@@ -1,56 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kids Bank Ultimate - Cloud Edition</title>
-
+    <title>Kids Bank Ultimate</title>
+    
+    <!-- Firebase Legacy SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
+    <!-- QRCode Support -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-
-    <style>
-        /* Keeping your exact original styles */
-        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-        body{background:linear-gradient(135deg,#ffb6f9,#b6e3ff,#fff0a6);min-height:100vh;padding:20px;transition:0.4s;}
-        .dark{background:linear-gradient(135deg,#111,#222,#333);color:white;}
-        .dark .login-box, .dark .dashboard, .dark .admin-panel, .dark .kid-card, .dark .receipt-box, .dark .applepay{background:#1f1f1f;color:white;}
-        .dark input, .dark select{background:#333;color:white;}
-        .dark .transaction{background:#2a2a2a;}
-        .container{max-width:1100px;margin:auto;}
-        .title{text-align:center;font-size:42px;margin-bottom:20px;color:#5b007a;}
-        .login-box, .dashboard, .admin-panel, .receipt-box, .applepay{background:white;padding:20px;border-radius:25px;box-shadow:0 10px 25px rgba(0,0,0,0.15);margin-bottom:20px;}
-        .subtitle{font-size:26px;margin-bottom:15px;color:#ff4fa3;}
-        input, select, button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:15px;font-size:16px;}
-        input, select{background:#f1f1f1;}
-        button{background:#ff69b4;color:white;font-weight:bold;cursor:pointer;}
-        button:hover{transform:scale(1.03);}
-        .balance-card{background:linear-gradient(135deg,#7c4dff,#ff4fa3);color:white;padding:25px;border-radius:25px;margin-top:15px;text-align:center;}
-        .balance{font-size:42px;font-weight:bold;}
-        .transaction{background:#f9f9f9;padding:12px;border-radius:12px;margin-top:10px;}
-        .hidden{display:none;}
-        .kid-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-top:20px;}
-        .kid-card{background:#fff5fd;padding:15px;border-radius:20px;text-align:center;}
-        .money{font-size:28px;font-weight:bold;}
-        .receipt-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:25px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:999;width:320px;}
-        .card{background:linear-gradient(135deg,#111,#444);color:white;padding:20px;border-radius:20px;margin-top:20px;font-size:18px;}
-        .apple-btn{background:black;}
-        img.profile{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px;}
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
     <h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
-    <button onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+    <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 
+    <!-- Login Box -->
     <div class="login-box" id="loginBox">
-        <h2 class="subtitle">Login</h2>
-        <select id="username">
-            <option value="">Choose Account</option>
+        <h2 class="subtitle">Secure Login</h2>
+        <!-- This status message tells you if Firebase is connected -->
+        <div id="loadingStatus" style="background: #fff0f5; padding: 10px; border-radius: 10px; margin-bottom: 15px; color: #ff4fa3; font-weight: bold;">
+            ⏳ Syncing with Cloud...
+        </div>
+        
+        <select id="username" disabled>
+            <option value="">-- Choose Your Name --</option>
             <option value="Adam">Adam</option>
             <option value="Mhmd">Mhmd</option>
             <option value="Jwd">Jwd</option>
@@ -60,285 +38,33 @@
             <option value="Hanady">Hanady</option>
             <option value="Mr.Alireda">Mr.Alireda (Admin)</option>
         </select>
-        <input type="password" id="password" placeholder="PIN">
-        <button onclick="login()">Login</button>
+        <input type="password" id="password" placeholder="4-Digit PIN">
+        <button id="loginBtn" onclick="login()" disabled>Login to Vault</button>
     </div>
 
+    <!-- Dashboard -->
     <div class="dashboard hidden" id="dashboard">
-        <h2 class="subtitle" id="welcome"></h2>
+        <h2 class="subtitle" id="welcomeText"></h2>
         <div class="balance-card">
-            <h2>Balance</h2>
-            <div class="balance" id="balance"></div>
-            <div id="goldBalance"></div>
+            <h3>Current Balance</h3>
+            <div class="balance" id="balanceDisplay">$0</div>
+            <div id="goldDisplay">🪙 Gold: 0</div>
         </div>
         <div class="card" id="fakeCard"></div>
-        <button onclick="claimDailyReward()">🎁 Claim Daily $20</button>
-        <div class="applepay">
-            <h2 class="subtitle">🍎 Apple Pay</h2>
-            <input type="number" id="appleAmount" placeholder="Apple Pay Amount">
-            <button class="apple-btn" onclick="applePay()">Pay with Apple Pay</button>
-        </div>
-        <h2 class="subtitle">Send Money</h2>
-        <select id="transferUser"></select>
-        <input type="number" id="transferAmount" placeholder="Amount">
-        <button onclick="transferMoney()">Send 💸</button>
-        <div class="balance-card">
-            <h2>🪙 Gold Wallet</h2>
-            <input type="number" id="goldAmount" placeholder="Gold Amount">
-            <button onclick="buyGold()">Buy Gold</button>
-            <p>1 Gold = $10</p>
-        </div>
-        <div id="qrcode"></div>
-        <h2 class="subtitle">📷 QR Scanner</h2>
-        <div id="reader" style="width:300px;"></div>
-        <div class="transactions">
-            <h2 class="subtitle">Transactions</h2>
-            <div id="transactionList"></div>
-        </div>
-        <button onclick="printReceipt()">🖨️ Print Receipt</button>
-        <button onclick="logout()">Logout</button>
+        <button onclick="claimDailyReward()" class="action-btn">🎁 Claim Daily $20</button>
+        <h3 class="subtitle">Recent Activity</h3>
+        <div id="transactionList"></div>
+        <button onclick="logout()" class="logout-btn">Logout</button>
     </div>
 
+    <!-- Admin Panel -->
     <div class="admin-panel hidden" id="adminPanel">
-        <h2 class="subtitle">👑 Admin Panel</h2>
-        <select id="selectedKid"></select>
-        <select id="receiverKid"></select>
-        <input type="number" id="amount" placeholder="Amount">
-        <select id="actionType">
-            <option value="add">Give Reward</option>
-            <option value="remove">Take Money</option>
-            <option value="tax">Tax</option>
-            <option value="transfer">Transfer Between Kids</option>
-        </select>
-        <input type="text" id="reason" placeholder="Reason">
-        <button onclick="applyAction()">Apply</button>
-        <div class="kid-grid" id="kidGrid"></div>
-    </div>
-
-    <div id="receipt" class="receipt-popup hidden">
-        <h2>🏦 Receipt</h2>
-        <div id="receiptContent"></div>
-        <button onclick="closeReceipt()">Close</button>
+        <h2 class="subtitle">👑 Vault Control</h2>
+        <div id="kidGrid" class="kid-grid"></div>
+        <button onclick="logout()" class="logout-btn">Exit Admin Mode</button>
     </div>
 </div>
 
-<script>
-// --- STEP 1: PASTE YOUR FIREBASE CONFIG HERE ---
-const firebaseConfig = {
-  apiKey: "AIzaSyD98VgtJlRZwyAqjfisscynyHJDU0yDCfM",
-  authDomain: "bank-e648b.firebaseapp.com",
-  databaseURL: "https://bank-e648b-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "bank-e648b",
-  storageBucket: "bank-e648b.firebasestorage.app",
-  messagingSenderId: "26932429584",
-  appId: "1:26932429584:web:49e5122c7b7066ce2ddb95"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-const clickSound = new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3');
-const moneySound = new Audio('https://www.soundjay.com/misc/sounds/cash-register-01.mp3');
-
-let users = {};
-let currentUser = null;
-let goldPrice = 10;
-
-// --- STEP 2: LIVE SYNC WITH DATABASE ---
-db.ref('users').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-        users = data;
-        // If we are already logged in, update the UI automatically
-        if (currentUser) {
-            if (users[currentUser].admin) {
-                refreshKidCards();
-            } else {
-                showUser();
-            }
-        }
-    } else {
-        // If Database is empty (null), fill it with initial data once
-        initializeCloudData();
-    }
-});
-
-function initializeCloudData() {
-    const initialUsers = {
-        Adam:{pin:'2103',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        Mhmd:{pin:'2708',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        Jwd:{pin:'1006',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        Ali:{pin:'2506',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        Jawad:{pin:'3007',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        Hsen:{pin:'1105',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        Hanady:{pin:'3690',balance:100,gold:0,photo:'https://i.imgur.com/6VBx3io.png',transactions:['🎁 Welcome bonus +$100']},
-        'Mr.Alireda':{pin:'1987',admin:true}
-    };
-    db.ref('users').set(initialUsers);
-}
-
-function saveData() {
-    db.ref('users').set(users);
-}
-
-// --- APP LOGIC ---
-
-function toggleDarkMode(){ document.body.classList.toggle('dark'); }
-
-function login(){
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    if(!users[username]) return alert('User not found');
-    if(users[username].pin !== password) return alert('Wrong PIN');
-    currentUser = username;
-    clickSound.play();
-    loginBox.classList.add('hidden');
-    dashboard.classList.remove('hidden');
-    if(users[currentUser].admin){ showAdmin(); } else { showUser(); startScanner(); }
-}
-
-function showUser(){
-    welcome.innerText = 'Welcome ' + currentUser;
-    balance.innerHTML = '$' + users[currentUser].balance;
-    goldBalance.innerHTML = '🪙 Gold: ' + users[currentUser].gold;
-    fakeCard.innerHTML = `<h3>💳 Kids Bank Card</h3><br><div>4000 ${Math.floor(Math.random()*9000+1000)} ${Math.floor(Math.random()*9000+1000)} ${Math.floor(Math.random()*9000+1000)}</div><br><div>${currentUser}</div>`;
-    transactionList.innerHTML='';
-    if(users[currentUser].transactions){
-        users[currentUser].transactions.slice().reverse().forEach(t=>{
-            const div = document.createElement('div');
-            div.className='transaction';
-            div.innerText=t;
-            transactionList.appendChild(div);
-        });
-    }
-    loadTransferUsers();
-    qrcode.innerHTML='';
-    new QRCode(document.getElementById('qrcode'),{ text: currentUser + ' payment', width:120, height:120 });
-}
-
-function showAdmin(){
-    welcome.innerText='Welcome Boss 👑';
-    balance.innerHTML='ADMIN';
-    adminPanel.classList.remove('hidden');
-    selectedKid.innerHTML='';
-    receiverKid.innerHTML='';
-    Object.keys(users).forEach(name=>{
-        if(!users[name].admin){
-            selectedKid.innerHTML += `<option value="${name}">${name}</option>`;
-            receiverKid.innerHTML += `<option value="${name}">${name}</option>`;
-        }
-    });
-    refreshKidCards();
-}
-
-function refreshKidCards(){
-    kidGrid.innerHTML='';
-    Object.keys(users).forEach(name=>{
-        if(!users[name].admin){
-            const card=document.createElement('div');
-            card.className='kid-card';
-            const lastT = users[name].transactions ? users[name].transactions[users[name].transactions.length-1] : 'No history';
-            card.innerHTML=`<img class="profile" src="${users[name].photo}"><h3>${name}</h3><div class="money">💵 $${users[name].balance}</div><div>🪙 ${users[name].gold} Gold</div><p>${lastT}</p>`;
-            kidGrid.appendChild(card);
-        }
-    });
-}
-
-function applyAction(){
-    const kid=selectedKid.value;
-    const receiver=receiverKid.value;
-    const amount=Number(document.getElementById('amount').value);
-    const type=actionType.value;
-    const reason=document.getElementById('reason').value || 'No reason';
-    if(amount<=0) return alert('Invalid amount');
-    if(!users[kid].transactions) users[kid].transactions = [];
-
-    if(type==='add'){
-        users[kid].balance += amount;
-        users[kid].transactions.push(`💰 Reward +$${amount} | ${reason}`);
-    } else if(type==='remove'){
-        users[kid].balance -= amount;
-        users[kid].transactions.push(`😈 Taken -$${amount}`);
-    } else if(type==='tax'){
-        users[kid].balance -= amount;
-        users[kid].transactions.push(`💸 Tax -$${amount}`);
-    } else if(type==='transfer'){
-        if(users[kid].balance < amount) return alert('Not enough money');
-        if(!users[receiver].transactions) users[receiver].transactions = [];
-        users[kid].balance -= amount;
-        users[receiver].balance += amount;
-        users[kid].transactions.push(`🔄 Sent $${amount} to ${receiver}`);
-        users[receiver].transactions.push(`🔄 Received $${amount} from ${kid}`);
-    }
-    moneySound.play();
-    saveData();
-}
-
-function loadTransferUsers(){
-    transferUser.innerHTML='';
-    Object.keys(users).forEach(name=>{
-        if(name!==currentUser && !users[name].admin){
-            transferUser.innerHTML += `<option value="${name}">${name}</option>`;
-        }
-    });
-}
-
-function transferMoney(){
-    const receiver=transferUser.value;
-    const amount=Number(transferAmount.value);
-    if(amount<=0) return alert('Invalid amount');
-    if(users[currentUser].balance < amount) return alert('Not enough money');
-    if(!users[receiver].transactions) users[receiver].transactions = [];
-    users[currentUser].balance -= amount;
-    users[receiver].balance += amount;
-    users[currentUser].transactions.push(`💸 Sent $${amount} to ${receiver}`);
-    users[receiver].transactions.push(`💰 Received $${amount} from ${currentUser}`);
-    moneySound.play();
-    saveData();
-}
-
-function buyGold(){
-    const amount=Number(goldAmount.value);
-    const cost=amount*goldPrice;
-    if(users[currentUser].balance < cost) return alert('Not enough money');
-    users[currentUser].balance -= cost;
-    users[currentUser].gold += amount;
-    users[currentUser].transactions.push(`🪙 Bought ${amount} gold`);
-    saveData();
-}
-
-function claimDailyReward(){
-    const today=new Date().toDateString();
-    if(users[currentUser].lastClaim===today) return alert('Already claimed today');
-    users[currentUser].lastClaim=today;
-    users[currentUser].balance += 20;
-    users[currentUser].transactions.push('🎁 Daily reward +$20');
-    saveData();
-}
-
-function applePay(){
-    const amount=Number(appleAmount.value);
-    if(amount<=0) return alert('Invalid amount');
-    if(users[currentUser].balance < amount) return alert('Not enough balance');
-    users[currentUser].balance -= amount;
-    users[currentUser].transactions.push(`🍎 Apple Pay -$${amount}`);
-    moneySound.play();
-    saveData();
-}
-
-function logout(){
-    currentUser=null;
-    loginBox.classList.remove('hidden');
-    dashboard.classList.add('hidden');
-    adminPanel.classList.add('hidden');
-    document.getElementById('password').value='';
-}
-
-function startScanner(){
-    const scanner = new Html5QrcodeScanner('reader', { qrbox:{width:250,height:250}, fps:5 });
-    scanner.render((result) => { alert('QR Scanned: ' + result); scanner.clear(); });
-}
-</script>
+<script src="script.js"></script>
 </body>
 </html>
