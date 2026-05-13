@@ -20,6 +20,13 @@ const goldPrice = 10;
 
 // Default users (initialize immediately)
 const defaultUsers = {
+    Adam: { pin: '2103', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Mhmd: { pin: '2708', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Jwd: { pin: '1006', admin: true, balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Ali: { pin: '2506', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Jawad: { pin: '3007', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Hsen: { pin: '1105', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Hanady: { pin: '3690', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
     Mr_Alireda: { pin: '1987', admin: true, displayName: 'Mr.Alireda' }
 };
 
@@ -32,9 +39,15 @@ const normalizeUserData = (userData) => {
     Object.keys(userData).forEach((key) => {
         const safeKey = sanitizeUserKey(key);
         const user = { ...userData[key] };
+
         if (safeKey !== key && !user.displayName) {
             user.displayName = key;
         }
+
+        if (safeKey === 'Jwd' || safeKey === 'Mr_Alireda') {
+            user.admin = true;
+        }
+
         safeData[safeKey] = user;
     });
     return safeData;
@@ -95,6 +108,7 @@ function initializeDOM() {
     if (buttons.printReceipt) buttons.printReceipt.addEventListener('click', printReceipt);
     if (buttons.logout) buttons.logout.addEventListener('click', logout);
     if (buttons.applyAction) buttons.applyAction.addEventListener('click', applyAction);
+    if (controls.actionType) controls.actionType.addEventListener('change', updateAdminActionVisibility);
 }
 
 // Initialize when DOM is ready
@@ -106,6 +120,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize Database
 const initializeCloudData = () => {
     const initialUsers = {
+        Adam: { pin: '2103', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Mhmd: { pin: '2708', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Jwd: { pin: '1006', admin: true, balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Ali: { pin: '2506', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Jawad: { pin: '3007', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Hsen: { pin: '1105', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Hanady: { pin: '3690', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
         Mr_Alireda: { pin: '1987', admin: true, displayName: 'Mr.Alireda' }
     };
     db.ref('users').set(initialUsers);
@@ -137,6 +158,11 @@ const createTransactionElement = (text) => {
     div.className = 'transaction';
     div.innerText = text;
     return div;
+};
+
+const updateAdminActionVisibility = () => {
+    const isTransfer = controls.actionType && controls.actionType.value === 'transfer';
+    elements.receiverKid.classList.toggle('hidden', !isTransfer);
 };
 
 // Show User Dashboard
@@ -183,6 +209,7 @@ const showAdmin = () => {
         }
     });
 
+    updateAdminActionVisibility();
     refreshKidCards();
 };
 
@@ -332,7 +359,7 @@ const buyGold = () => {
 
 // Claim Daily Reward
 const claimDailyReward = () => {
-    const today = new Date().toDateString();
+    const today = new Date().toISOString().slice(0, 10);
 
     if (users[currentUser].lastClaim === today) {
         alert('Already claimed today');
