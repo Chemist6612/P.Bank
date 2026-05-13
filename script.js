@@ -20,18 +20,25 @@ const goldPrice = 10;
 
 // Default users (initialize immediately)
 const defaultUsers = {
-    Adam: { pin: '2103', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    Mhmd: { pin: '2708', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    Jwd: { pin: '1006', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    Ali: { pin: '2506', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    Jawad: { pin: '3007', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    Hsen: { pin: '1105', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    Hanady: { pin: '3690', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-    'Mr.Alireda': { pin: '1987', admin: true }
+    Mr_Alireda: { pin: '1987', admin: true, displayName: 'Mr.Alireda' }
 };
 
 // Set users immediately
 users = { ...defaultUsers };
+
+const sanitizeUserKey = (key) => key.replace(/[.#$\/\[\]]/g, '_');
+const normalizeUserData = (userData) => {
+    const safeData = {};
+    Object.keys(userData).forEach((key) => {
+        const safeKey = sanitizeUserKey(key);
+        const user = { ...userData[key] };
+        if (safeKey !== key && !user.displayName) {
+            user.displayName = key;
+        }
+        safeData[safeKey] = user;
+    });
+    return safeData;
+};
 
 // DOM Element References
 let elements = {};
@@ -63,7 +70,6 @@ function initializeDOM() {
         password: document.getElementById('password'),
         transferAmount: document.getElementById('transferAmount'),
         goldAmount: document.getElementById('goldAmount'),
-        appleAmount: document.getElementById('appleAmount'),
         amount: document.getElementById('amount'),
         actionType: document.getElementById('actionType'),
         reason: document.getElementById('reason')
@@ -73,7 +79,6 @@ function initializeDOM() {
         toggleTheme: document.getElementById('toggleTheme'),
         login: document.getElementById('loginButton'),
         claimReward: document.getElementById('claimReward'),
-        applePay: document.getElementById('applePayButton'),
         transfer: document.getElementById('transferButton'),
         buyGold: document.getElementById('buyGoldButton'),
         printReceipt: document.getElementById('printReceiptButton'),
@@ -85,7 +90,6 @@ function initializeDOM() {
     if (buttons.toggleTheme) buttons.toggleTheme.addEventListener('click', () => document.body.classList.toggle('dark'));
     if (buttons.login) buttons.login.addEventListener('click', login);
     if (buttons.claimReward) buttons.claimReward.addEventListener('click', claimDailyReward);
-    if (buttons.applePay) buttons.applePay.addEventListener('click', applePay);
     if (buttons.transfer) buttons.transfer.addEventListener('click', transferMoney);
     if (buttons.buyGold) buttons.buyGold.addEventListener('click', buyGold);
     if (buttons.printReceipt) buttons.printReceipt.addEventListener('click', printReceipt);
@@ -102,26 +106,27 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize Database
 const initializeCloudData = () => {
     const initialUsers = {
-        Adam: { pin: '2103', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        Mhmd: { pin: '2708', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        Jwd: { pin: '1006', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        Ali: { pin: '2506', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        Jawad: { pin: '3007', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        Hsen: { pin: '1105', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        Hanady: { pin: '3690', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
-        'Mr.Alireda': { pin: '1987', admin: true }
+        Mr_Alireda: { pin: '1987', admin: true, displayName: 'Mr.Alireda' }
     };
     db.ref('users').set(initialUsers);
 };
 
-const saveData = () => db.ref('users').set(users);
+const saveData = () => {
+    try {
+        const safeUsers = normalizeUserData(users);
+        db.ref('users').set(safeUsers).catch(err => console.warn('Firebase save failed:', err));
+    } catch (error) {
+        console.warn('Firebase save failed:', error);
+    }
+};
 
 // Load Transfer Users
 const loadTransferUsers = () => {
     elements.transferUser.innerHTML = '';
     Object.keys(users).forEach(name => {
         if (name !== currentUser && !users[name].admin) {
-            elements.transferUser.innerHTML += `<option value="${name}">${name}</option>`;
+            const displayName = users[name].displayName || name;
+            elements.transferUser.innerHTML += `<option value="${name}">${displayName}</option>`;
         }
     });
 };
@@ -136,13 +141,14 @@ const createTransactionElement = (text) => {
 
 // Show User Dashboard
 const showUser = () => {
-    elements.welcome.innerText = `Welcome ${currentUser}`;
+    const displayName = users[currentUser].displayName || currentUser;
+    elements.welcome.innerText = `Welcome ${displayName}`;
     elements.balance.innerText = `$${users[currentUser].balance}`;
     elements.goldBalance.innerText = `🪙 Gold: ${users[currentUser].gold}`;
     elements.fakeCard.innerHTML = `
         <h3>💳 Kids Bank Card</h3>
         <div>4000 ${Math.floor(Math.random() * 9000 + 1000)} ${Math.floor(Math.random() * 9000 + 1000)} ${Math.floor(Math.random() * 9000 + 1000)}</div>
-        <div>${currentUser}</div>
+        <div>${displayName}</div>
     `;
     elements.transactionList.innerHTML = '';
 
@@ -171,8 +177,9 @@ const showAdmin = () => {
 
     Object.keys(users).forEach(name => {
         if (!users[name].admin) {
-            elements.selectedKid.innerHTML += `<option value="${name}">${name}</option>`;
-            elements.receiverKid.innerHTML += `<option value="${name}">${name}</option>`;
+            const displayName = users[name].displayName || name;
+            elements.selectedKid.innerHTML += `<option value="${name}">${displayName}</option>`;
+            elements.receiverKid.innerHTML += `<option value="${name}">${displayName}</option>`;
         }
     });
 
@@ -186,10 +193,11 @@ const refreshKidCards = () => {
         if (!users[name].admin) {
             const card = document.createElement('div');
             card.className = 'kid-card';
+            const displayName = users[name].displayName || name;
             const lastTransaction = users[name].transactions ? users[name].transactions.slice(-1)[0] : 'No history';
             card.innerHTML = `
                 <img class="profile" src="${users[name].photo}">
-                <h3>${name}</h3>
+                <h3>${displayName}</h3>
                 <div class="money">💵 $${users[name].balance}</div>
                 <div>🪙 ${users[name].gold} Gold</div>
                 <p>${lastTransaction}</p>
@@ -338,27 +346,6 @@ const claimDailyReward = () => {
     showUser();
 };
 
-// Apple Pay
-const applePay = () => {
-    const amount = Number(controls.appleAmount.value);
-
-    if (amount <= 0) {
-        alert('Invalid amount');
-        return;
-    }
-
-    if (users[currentUser].balance < amount) {
-        alert('Not enough balance');
-        return;
-    }
-
-    users[currentUser].balance -= amount;
-    users[currentUser].transactions.push(`🍎 Apple Pay -$${amount}`);
-    moneySound.play();
-    saveData();
-    showUser();
-};
-
 // Logout
 const logout = () => {
     currentUser = null;
@@ -402,7 +389,7 @@ const connectDatabase = () => {
         const data = snapshot.val();
 
         if (data) {
-            users = data;
+            users = normalizeUserData(data);
             if (currentUser) {
                 if (users[currentUser].admin) {
                     refreshKidCards();

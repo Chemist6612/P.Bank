@@ -19,7 +19,7 @@ body.dark {
 .dark .title { color: #ffb6f9; text-shadow: none; }
 
 /* Panels */
-.login-box, .dashboard, .admin-panel, .applepay, .receipt-popup {
+.login-box, .dashboard, .admin-panel, .receipt-popup {
     background: white;
     padding: 25px;
     border-radius: 25px;
@@ -27,7 +27,7 @@ body.dark {
     margin-bottom: 20px;
 }
 
-.dark .login-box, .dark .dashboard, .dark .admin-panel, .dark .applepay, .dark .receipt-popup {
+.dark .login-box, .dark .dashboard, .dark .admin-panel, .dark .receipt-popup {
     background: #1e1e1e;
     color: white;
 }
@@ -39,6 +39,7 @@ input, select, button {
     width: 100%;
     padding: 14px;
     margin-top: 12px;
+    margin-bottom: 16px;
     border: none;
     border-radius: 12px;
     font-size: 16px;
@@ -57,7 +58,10 @@ button {
 
 button:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-.apple-btn { background: #000; }
+.signup-link { margin-top: 0; color: #333; font-size: 14px; }
+.signup-link a { color: #ff4fa3; text-decoration: none; font-weight: 700; }
+.signup-link a:hover { text-decoration: underline; }
+
 .logout-btn { background: #555; margin-top: 20px; }
 
 /* Balance & Card */
