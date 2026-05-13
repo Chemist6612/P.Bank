@@ -3,68 +3,104 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kids Bank Ultimate</title>
-    
-    <!-- Firebase Legacy SDKs -->
+    <title>Kids Bank Ultimate - Cloud Edition</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    
-    <!-- QRCode Support -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
+    <div class="container">
+        <h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
+        <button id="toggleTheme" class="toggle-theme">🌙 Toggle Dark Mode</button>
 
-<div class="container">
-    <h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
-    <button class="mode-toggle" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
-
-    <!-- Login Box -->
-    <div class="login-box" id="loginBox">
-        <h2 class="subtitle">Secure Login</h2>
-        <!-- This status message tells you if Firebase is connected -->
-        <div id="loadingStatus" style="background: #fff0f5; padding: 10px; border-radius: 10px; margin-bottom: 15px; color: #ff4fa3; font-weight: bold;">
-            ⏳ Syncing with Cloud...
+        <!-- Login Box -->
+        <div class="panel" id="loginBox">
+            <h2 class="subtitle">Login</h2>
+            <select id="username">
+                <option value="">Choose Account</option>
+                <option value="Adam">Adam</option>
+                <option value="Mhmd">Mhmd</option>
+                <option value="Jwd">Jwd</option>
+                <option value="Ali">Ali</option>
+                <option value="Jawad">Jawad</option>
+                <option value="Hsen">Hsen</option>
+                <option value="Hanady">Hanady</option>
+                <option value="Mr.Alireda">Mr.Alireda (Admin)</option>
+            </select>
+            <input type="password" id="password" placeholder="PIN">
+            <button id="loginButton" class="action-btn">Login</button>
         </div>
-        
-        <select id="username" disabled>
-            <option value="">-- Choose Your Name --</option>
-            <option value="Adam">Adam</option>
-            <option value="Mhmd">Mhmd</option>
-            <option value="Jwd">Jwd</option>
-            <option value="Ali">Ali</option>
-            <option value="Jawad">Jawad</option>
-            <option value="Hsen">Hsen</option>
-            <option value="Hanady">Hanady</option>
-            <option value="Mr.Alireda">Mr.Alireda (Admin)</option>
-        </select>
-        <input type="password" id="password" placeholder="4-Digit PIN">
-        <button id="loginBtn" onclick="login()" disabled>Login to Vault</button>
-    </div>
 
-    <!-- Dashboard -->
-    <div class="dashboard hidden" id="dashboard">
-        <h2 class="subtitle" id="welcomeText"></h2>
-        <div class="balance-card">
-            <h3>Current Balance</h3>
-            <div class="balance" id="balanceDisplay">$0</div>
-            <div id="goldDisplay">🪙 Gold: 0</div>
+        <!-- User Dashboard -->
+        <div class="panel hidden" id="dashboard">
+            <h2 class="subtitle" id="welcome"></h2>
+            <div class="balance-card">
+                <h2>Balance</h2>
+                <div class="balance" id="balance"></div>
+                <div id="goldBalance"></div>
+            </div>
+
+            <div class="card" id="fakeCard"></div>
+            <button id="claimReward" class="action-btn">🎁 Claim Daily $20</button>
+
+            <div class="applepay">
+                <h2 class="subtitle">🍎 Apple Pay</h2>
+                <input type="number" id="appleAmount" placeholder="Apple Pay Amount">
+                <button id="applePayButton" class="action-btn apple-btn">Pay with Apple Pay</button>
+            </div>
+
+            <h2 class="subtitle">Send Money</h2>
+            <select id="transferUser"></select>
+            <input type="number" id="transferAmount" placeholder="Amount">
+            <button id="transferButton" class="action-btn">Send 💸</button>
+
+            <div class="balance-card">
+                <h2>🪙 Gold Wallet</h2>
+                <input type="number" id="goldAmount" placeholder="Gold Amount">
+                <button id="buyGoldButton" class="action-btn">Buy Gold</button>
+                <p>1 Gold = $10</p>
+            </div>
+
+            <div id="qrcode"></div>
+            <h2 class="subtitle">📷 QR Scanner</h2>
+            <div id="reader" style="width:300px;"></div>
+
+            <div class="transactions">
+                <h2 class="subtitle">Transactions</h2>
+                <div id="transactionList"></div>
+            </div>
+
+            <button id="printReceiptButton" class="action-btn">🖨️ Print Receipt</button>
+            <button id="logoutButton" class="action-btn">Logout</button>
         </div>
-        <div class="card" id="fakeCard"></div>
-        <button onclick="claimDailyReward()" class="action-btn">🎁 Claim Daily $20</button>
-        <h3 class="subtitle">Recent Activity</h3>
-        <div id="transactionList"></div>
-        <button onclick="logout()" class="logout-btn">Logout</button>
+
+        <!-- Admin Panel -->
+        <div class="panel hidden" id="adminPanel">
+            <h2 class="subtitle">👑 Admin Panel</h2>
+            <select id="selectedKid"></select>
+            <select id="receiverKid"></select>
+            <input type="number" id="amount" placeholder="Amount">
+            <select id="actionType">
+                <option value="add">Give Reward</option>
+                <option value="remove">Take Money</option>
+                <option value="tax">Tax</option>
+                <option value="transfer">Transfer Between Kids</option>
+            </select>
+            <input type="text" id="reason" placeholder="Reason">
+            <button id="applyActionButton" class="action-btn">Apply</button>
+            <div class="kid-grid" id="kidGrid"></div>
+        </div>
+
+        <!-- Receipt Popup -->
+        <div id="receipt" class="receipt-popup hidden">
+            <h2>🏦 Receipt</h2>
+            <div id="receiptContent"></div>
+            <button class="action-btn" onclick="closeReceipt()">Close</button>
+        </div>
     </div>
 
-    <!-- Admin Panel -->
-    <div class="admin-panel hidden" id="adminPanel">
-        <h2 class="subtitle">👑 Vault Control</h2>
-        <div id="kidGrid" class="kid-grid"></div>
-        <button onclick="logout()" class="logout-btn">Exit Admin Mode</button>
-    </div>
-</div>
-
-<script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
