@@ -27,6 +27,7 @@ const defaultUsers = {
     Jawad: { pin: '3007', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
     Hsen: { pin: '1105', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
     Hanady: { pin: '3690', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+    Abbas: { pin: '1023', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
     Mr_Alireda: { pin: '1987', admin: true, displayName: 'Mr.Alireda' }
 };
 
@@ -94,6 +95,7 @@ function initializeDOM() {
         claimReward: document.getElementById('claimReward'),
         transfer: document.getElementById('transferButton'),
         buyGold: document.getElementById('buyGoldButton'),
+        sellGold: document.getElementById('sellGoldButton'),
         printReceipt: document.getElementById('printReceiptButton'),
         logout: document.getElementById('logoutButton'),
         applyAction: document.getElementById('applyActionButton')
@@ -105,6 +107,7 @@ function initializeDOM() {
     if (buttons.claimReward) buttons.claimReward.addEventListener('click', claimDailyReward);
     if (buttons.transfer) buttons.transfer.addEventListener('click', transferMoney);
     if (buttons.buyGold) buttons.buyGold.addEventListener('click', buyGold);
+    if (buttons.sellGold) buttons.sellGold.addEventListener('click', sellGold);
     if (buttons.printReceipt) buttons.printReceipt.addEventListener('click', printReceipt);
     if (buttons.logout) buttons.logout.addEventListener('click', logout);
     if (buttons.applyAction) buttons.applyAction.addEventListener('click', applyAction);
@@ -114,6 +117,7 @@ function initializeDOM() {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     initializeDOM();
+    populateLoginUsers();
     connectDatabase();
 });
 
@@ -127,6 +131,7 @@ const initializeCloudData = () => {
         Jawad: { pin: '3007', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
         Hsen: { pin: '1105', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
         Hanady: { pin: '3690', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
+        Abbas: { pin: '1023', balance: 100, gold: 0, photo: 'https://i.imgur.com/6VBx3io.png', transactions: ['🎁 Welcome bonus +$100'] },
         Mr_Alireda: { pin: '1987', admin: true, displayName: 'Mr.Alireda' }
     };
     db.ref('users').set(initialUsers);
@@ -138,6 +143,36 @@ const saveData = () => {
         db.ref('users').set(safeUsers).catch(err => console.warn('Firebase save failed:', err));
     } catch (error) {
         console.warn('Firebase save failed:', error);
+    }
+};
+
+// Populate Login Dropdown
+const populateLoginUsers = () => {
+    const loginSelect = document.getElementById('username');
+    if (!loginSelect) return;
+    
+    const currentValue = loginSelect.value;
+    const options = loginSelect.querySelectorAll('option');
+    const firstOption = options[0]; // Keep the "Choose Account" option
+    
+    // Remove all options except the first one
+    for (let i = options.length - 1; i > 0; i--) {
+        options[i].remove();
+    }
+    
+    // Add users dynamically
+    Object.keys(users).forEach(name => {
+        const displayName = users[name].displayName || name;
+        const isAdmin = users[name].admin ? ' (Admin)' : '';
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = displayName + isAdmin;
+        loginSelect.appendChild(option);
+    });
+    
+    // Restore previous selection if it still exists
+    if (currentValue && users[currentValue]) {
+        loginSelect.value = currentValue;
     }
 };
 
@@ -353,6 +388,30 @@ const buyGold = () => {
     users[currentUser].balance -= cost;
     users[currentUser].gold += amount;
     users[currentUser].transactions.push(`🪙 Bought ${amount} gold`);
+    controls.goldAmount.value = '';
+    saveData();
+    showUser();
+};
+
+// Sell Gold
+const sellGold = () => {
+    const amount = Number(controls.goldAmount.value);
+    const revenue = amount * goldPrice;
+
+    if (amount <= 0) {
+        alert('Invalid amount');
+        return;
+    }
+
+    if (users[currentUser].gold < amount) {
+        alert('Not enough gold');
+        return;
+    }
+
+    users[currentUser].gold -= amount;
+    users[currentUser].balance += revenue;
+    users[currentUser].transactions.push(`🪙 Sold ${amount} gold for $${revenue}`);
+    controls.goldAmount.value = '';
     saveData();
     showUser();
 };
@@ -417,6 +476,7 @@ const connectDatabase = () => {
 
         if (data) {
             users = normalizeUserData(data);
+            populateLoginUsers();
             if (currentUser) {
                 if (users[currentUser].admin) {
                     refreshKidCards();
