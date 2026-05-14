@@ -57,9 +57,7 @@ const connectDatabase = () => {
 const login = () => {
     const user = document.getElementById('username').value;
     const pin = document.getElementById('password').value;
-    
-    if (!users[user]) return alert('Select a user!');
-    if (users[user].pin !== pin) return alert('Wrong PIN!');
+    if (!users[user] || users[user].pin !== pin) return alert('Wrong User or PIN!');
 
     currentUser = user;
     document.getElementById('loginBox').classList.add('hidden');
@@ -77,13 +75,12 @@ const showUser = () => {
     const u = users[currentUser];
     document.getElementById('welcome').innerText = `Welcome ${u.displayName || currentUser}`;
     document.getElementById('balance').innerText = `$${u.balance}`;
+    document.getElementById('goldBalance').innerText = `🪙 Gold: ${u.gold || 0}`;
     
-    // --- TRANSACTION FIX ---
     const list = document.getElementById('transactionList');
     if (list) {
         list.innerHTML = '';
-        const history = u.transactions || [];
-        history.slice().reverse().forEach(t => {
+        (u.transactions || []).slice().reverse().forEach(t => {
             const d = document.createElement('div');
             d.className = 'transaction';
             d.innerText = t;
@@ -95,8 +92,7 @@ const showUser = () => {
 const showAdmin = () => {
     const sel = document.getElementById('selectedKid');
     const rec = document.getElementById('receiverKid');
-    sel.innerHTML = '';
-    rec.innerHTML = '';
+    sel.innerHTML = ''; rec.innerHTML = '';
     
     Object.keys(users).forEach(n => {
         if (!users[n].admin) {
@@ -119,19 +115,15 @@ const refreshKidCards = () => {
     Object.keys(users).forEach(n => {
         if (!users[n].admin) {
             const u = users[n];
-            
-            // Show Cards
             const card = document.createElement('div');
             card.className = 'kid-card';
-            card.innerHTML = `<h3>${n}</h3><p>Balance: $${u.balance}</p>`;
+            card.innerHTML = `<h3>${n}</h3><p>💵 $${u.balance}</p><p>🪙 ${u.gold || 0} Gold</p>`;
             grid.appendChild(card);
 
-            // Show History in Admin Panel
             if (adminHistory) {
                 const section = document.createElement('div');
-                section.innerHTML = `<h4>${n}</h4>`;
-                const hist = u.transactions || [];
-                hist.slice().reverse().forEach(t => {
+                section.innerHTML = `<hr><h4>${n} History</h4>`;
+                (u.transactions || []).slice().reverse().forEach(t => {
                     section.innerHTML += `<div class="transaction">${t}</div>`;
                 });
                 adminHistory.appendChild(section);
@@ -144,21 +136,27 @@ const applyAction = () => {
     const kid = document.getElementById('selectedKid').value;
     const type = document.getElementById('actionType').value;
     const amt = Number(document.getElementById('amount').value);
-    const reason = document.getElementById('reason').value || "No reason provided";
+    const reason = document.getElementById('reason').value || "No reason";
     
-    if (!users[kid]) return alert("Select a kid first!");
+    if (!users[kid]) return alert("Select a kid!");
     if (!users[kid].transactions) users[kid].transactions = [];
 
     if (type === 'add') {
         users[kid].balance += amt;
         users[kid].transactions.push(`💰 +$${amt} | ${reason}`);
-    } else if (type === 'remove') {
+    } else if (type === 'remove' || type === 'tax') {
         users[kid].balance -= amt;
-        users[kid].transactions.push(`😈 -$${amt} | ${reason}`);
+        users[kid].transactions.push(`📉 -$${amt} (Tax/Fine) | ${reason}`);
+    } else if (type === 'addGold') {
+        users[kid].gold = (users[kid].gold || 0) + amt;
+        users[kid].transactions.push(`🪙 +${amt} Gold | ${reason}`);
+    } else if (type === 'removeGold') {
+        users[kid].gold = Math.max(0, (users[kid].gold || 0) - amt);
+        users[kid].transactions.push(`🪙 -${amt} Gold | ${reason}`);
     }
 
     db.ref('users').set(users);
-    alert('Transaction Successful!');
+    alert('Action Applied!');
 };
 
 document.addEventListener('DOMContentLoaded', () => {

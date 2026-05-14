@@ -3,86 +3,81 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kids Bank Ultimate - Cloud Edition</title>
+    <title>Kids Bank Ultimate</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase Legacy SDKs (Required for compat mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
     <div class="container">
         <h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
         <button id="toggleTheme" class="toggle-theme">🌙 Toggle Dark Mode</button>
 
+        <!-- LOGIN PANEL -->
         <div class="panel" id="loginBox">
             <h2 class="subtitle">Login</h2>
             <select id="username">
                 <option value="">Choose Account</option>
             </select>
             <input type="password" id="password" placeholder="PIN">
-            <button id="loginButton" class="action-btn">Login</button>
-            <p class="signup-link">Don't have an account? <a href="https://forms.gle/ziCxEk2dNN3r8tBi8" target="_blank">Create one here</a>.</p>
+            <button id="loginButton">Login</button>
         </div>
 
+        <!-- USER DASHBOARD -->
         <div class="panel hidden" id="dashboard">
             <h2 class="subtitle" id="welcome"></h2>
             <div class="balance-card">
                 <h2>Balance</h2>
-                <div class="balance" id="balance"></div>
-                <div id="goldBalance"></div>
+                <div class="balance" id="balance">$0</div>
+                <div id="goldBalance">🪙 Gold: 0</div>
             </div>
-            <div class="card" id="fakeCard"></div>
-            <button id="claimReward" class="action-btn">🎁 Claim Daily $20</button>
-            <h2 class="subtitle">Send Money</h2>
-            <select id="transferUser"></select>
-            <input type="number" id="transferAmount" placeholder="Amount">
-            <button id="transferButton" class="action-btn">Send 💸</button>
-            <div class="balance-card">
-                <h2>🪙 Gold Wallet</h2>
-                <input type="number" id="goldAmount" placeholder="Gold Amount">
-                <button id="buyGoldButton" class="action-btn">Buy Gold</button>
-                <button id="sellGoldButton" class="action-btn">Sell Gold</button>
-                <p id="goldPriceLabel">1 Gold = $10</p>
-                <label for="goldPrice">Gold Price</label>
-                <input type="number" id="goldPrice" value="10" min="1" step="0.5">
+
+            <h2 class="subtitle">Transactions</h2>
+            <div id="transactionList">
+                <div class="transaction">No transactions yet.</div>
             </div>
-            <div id="qrcode"></div>
-            <h2 class="subtitle">📷 QR Scanner</h2>
-            <div id="reader" style="width:300px;"></div>
-            <div class="transactions">
-                <h2 class="subtitle">Transactions</h2>
-                <div id="transactionList"></div>
-            </div>
-            <button id="printReceiptButton" class="action-btn">🖨️ Print Receipt</button>
-            <button id="logoutButton" class="action-btn">Logout</button>
+
+            <button id="logoutButton">Logout</button>
         </div>
 
+        <!-- ADMIN PANEL -->
         <div class="panel hidden" id="adminPanel">
-            <h2 class="subtitle">👑 Admin Panel</h2>
+            <h2 class="subtitle">👑 Admin Control Panel</h2>
+            
+            <label for="selectedKid">Select Member:</label>
             <select id="selectedKid"></select>
-            <select id="receiverKid"></select>
-            <input type="number" id="amount" placeholder="Amount">
-            <select id="actionType">
-                <option value="add">Give Reward</option>
-                <option value="remove">Take Money</option>
-                <option value="tax">Tax</option>
-                <option value="transfer">Transfer Between Kids</option>
-            </select>
-            <input type="text" id="reason" placeholder="Reason">
-            <button id="applyActionButton" class="action-btn">Apply</button>
-            <div class="kid-grid" id="kidGrid"></div>
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
-            <h2 class="subtitle">📜 Full Transaction Histories</h2>
-            <div id="adminFullHistory"></div>
-        </div>
 
-        <div id="receipt" class="receipt-popup hidden">
-            <h2>🏦 Receipt</h2>
-            <div id="receiptContent"></div>
-            <button class="action-btn" onclick="closeReceipt()">Close</button>
+            <label for="actionType">Action:</label>
+            <select id="actionType">
+                <option value="add">💰 Give Money</option>
+                <option value="remove">📉 Take Money (Tax)</option>
+                <option value="addGold">🪙 Give Gold</option>
+                <option value="removeGold">📤 Take Gold</option>
+            </select>
+
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" placeholder="Enter amount">
+
+            <label for="reason">Reason:</label>
+            <input type="text" id="reason" placeholder="e.g. For doing chores or Late tax">
+
+            <button id="applyActionButton">Apply Action</button>
+
+            <!-- Grid to see everyone's balance at once -->
+            <h2 class="subtitle">Live Balances</h2>
+            <div class="kid-grid" id="kidGrid"></div>
+
+            <h2 class="subtitle">Full History Log</h2>
+            <div id="adminFullHistory"></div>
+
+            <button id="adminLogout" onclick="location.reload()">Logout Admin</button>
         </div>
     </div>
+
+    <!-- Receiver field (Hidden unless doing transfers) -->
+    <select id="receiverKid" class="hidden"></select>
+
     <script src="script.js" defer></script>
 </body>
 </html>
