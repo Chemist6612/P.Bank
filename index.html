@@ -15,7 +15,6 @@
         <h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
         <button id="toggleTheme" class="toggle-theme">🌙 Toggle Dark Mode</button>
 
-        <!-- Login Box -->
         <div class="panel" id="loginBox">
             <h2 class="subtitle">Login</h2>
             <select id="username">
@@ -26,7 +25,6 @@
             <p class="signup-link">Don't have an account? <a href="https://forms.gle/ziCxEk2dNN3r8tBi8" target="_blank">Create one here</a>.</p>
         </div>
 
-        <!-- User Dashboard -->
         <div class="panel hidden" id="dashboard">
             <h2 class="subtitle" id="welcome"></h2>
             <div class="balance-card">
@@ -34,37 +32,32 @@
                 <div class="balance" id="balance"></div>
                 <div id="goldBalance"></div>
             </div>
-
             <div class="card" id="fakeCard"></div>
             <button id="claimReward" class="action-btn">🎁 Claim Daily $20</button>
-
             <h2 class="subtitle">Send Money</h2>
             <select id="transferUser"></select>
             <input type="number" id="transferAmount" placeholder="Amount">
             <button id="transferButton" class="action-btn">Send 💸</button>
-
             <div class="balance-card">
                 <h2>🪙 Gold Wallet</h2>
                 <input type="number" id="goldAmount" placeholder="Gold Amount">
                 <button id="buyGoldButton" class="action-btn">Buy Gold</button>
                 <button id="sellGoldButton" class="action-btn">Sell Gold</button>
-                <p>1 Gold = $10</p>
+                <p id="goldPriceLabel">1 Gold = $10</p>
+                <label for="goldPrice">Gold Price</label>
+                <input type="number" id="goldPrice" value="10" min="1" step="0.5">
             </div>
-
             <div id="qrcode"></div>
             <h2 class="subtitle">📷 QR Scanner</h2>
             <div id="reader" style="width:300px;"></div>
-
             <div class="transactions">
                 <h2 class="subtitle">Transactions</h2>
                 <div id="transactionList"></div>
             </div>
-
             <button id="printReceiptButton" class="action-btn">🖨️ Print Receipt</button>
             <button id="logoutButton" class="action-btn">Logout</button>
         </div>
 
-        <!-- Admin Panel -->
         <div class="panel hidden" id="adminPanel">
             <h2 class="subtitle">👑 Admin Panel</h2>
             <select id="selectedKid"></select>
@@ -79,16 +72,17 @@
             <input type="text" id="reason" placeholder="Reason">
             <button id="applyActionButton" class="action-btn">Apply</button>
             <div class="kid-grid" id="kidGrid"></div>
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
+            <h2 class="subtitle">📜 Full Transaction Histories</h2>
+            <div id="adminFullHistory"></div>
         </div>
 
-        <!-- Receipt Popup -->
         <div id="receipt" class="receipt-popup hidden">
             <h2>🏦 Receipt</h2>
             <div id="receiptContent"></div>
             <button class="action-btn" onclick="closeReceipt()">Close</button>
         </div>
     </div>
-
     <script src="script.js" defer></script>
 </body>
 </html>
