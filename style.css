@@ -7,11 +7,6 @@ body {
     transition: background 0.4s; 
 }
 
-body.dark { 
-    background: linear-gradient(135deg, #111, #222, #333); 
-    color: white; 
-}
-
 .container { max-width: 900px; margin: auto; }
 
 .title { 
@@ -22,8 +17,6 @@ body.dark {
     text-shadow: 2px 2px #fff; 
 }
 
-.dark .title { color: #ffb6f9; text-shadow: none; }
-
 .panel, .receipt-popup { 
     background: white; 
     padding: 25px; 
@@ -31,8 +24,6 @@ body.dark {
     box-shadow: 0 8px 30px rgba(0,0,0,0.1); 
     margin-bottom: 20px; 
 }
-
-.dark .panel, .dark .receipt-popup { background: #1e1e1e; color: white; }
 
 .subtitle { color: #ff4fa3; margin-bottom: 15px; }
 
@@ -47,7 +38,6 @@ input, select, button {
 }
 
 input, select { background: #f0f2f5; }
-.dark input, .dark select { background: #333; color: white; }
 
 button { 
     background: #ff69b4; 
@@ -70,8 +60,6 @@ button:hover { filter: brightness(1.1); transform: translateY(-2px); }
     color: #333; 
 }
 
-.dark .transaction { background: #2a2a2a; color: #eee; }
-
 .kid-grid { 
     display: grid; 
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
@@ -88,6 +76,59 @@ button:hover { filter: brightness(1.1); transform: translateY(-2px); }
     color: #333; 
 }
 
-.dark .kid-card { background: #2a2a2a; color: #fff; }
+.admin-history-section {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 10px;
+}
 
-.history-scroll { max-height: 180px; overflow-y: auto; font-size: 13px; }
+/* ========================================= */
+/* --- THE PURE WHITE DARK THEME FIX ---     */
+/* ========================================= */
+
+body.dark { 
+    background: linear-gradient(135deg, #111, #222, #333); 
+    color: white; 
+}
+
+/* Force Title to be pure white */
+body.dark .title { 
+    color: white !important; 
+    text-shadow: none; 
+}
+
+/* Force Subtitles to be white */
+body.dark .subtitle { 
+    color: white !important; 
+    border-left: 4px solid white; 
+    padding-left: 10px;
+}
+
+/* Panels and Cards in Dark Mode */
+body.dark .panel, 
+body.dark .receipt-popup, 
+body.dark .kid-card { 
+    background: #1e1e1e; 
+    color: white !important; 
+}
+
+/* Transactions in Dark Mode */
+body.dark .transaction {
+    border-left: 4px solid white;
+    background: #2a2a2a;
+    color: white !important;
+}
+
+/* Inputs and Selects text */
+body.dark input, 
+body.dark select { 
+    background: #333; 
+    color: white !important; 
+    border: 1px solid #444;
+}
+
+/* Buttons */
+body.dark button {
+    color: white;
+}

@@ -26,6 +26,7 @@ const defaultUsers = {
 let users = { ...defaultUsers };
 let currentUser = null;
 
+// Helper to fill dropdowns (Forces lists to load for Brave Browser)
 const populateLoginUsers = () => {
     const loginSelect = document.getElementById('username');
     if (!loginSelect) return;
@@ -57,7 +58,9 @@ const connectDatabase = () => {
 const login = () => {
     const user = document.getElementById('username').value;
     const pin = document.getElementById('password').value;
-    if (!users[user] || users[user].pin !== pin) return alert('Wrong User or PIN!');
+    
+    if (!users[user]) return alert('Select a user!');
+    if (users[user].pin !== pin) return alert('Wrong PIN!');
 
     currentUser = user;
     document.getElementById('loginBox').classList.add('hidden');
@@ -80,25 +83,31 @@ const showUser = () => {
     const list = document.getElementById('transactionList');
     if (list) {
         list.innerHTML = '';
-        (u.transactions || []).slice().reverse().forEach(t => {
-            const d = document.createElement('div');
-            d.className = 'transaction';
-            d.innerText = t;
-            list.appendChild(d);
-        });
+        const history = u.transactions || [];
+        if (history.length > 0) {
+            history.slice().reverse().forEach(t => {
+                const d = document.createElement('div');
+                d.className = 'transaction';
+                d.innerText = t;
+                list.appendChild(d);
+            });
+        } else {
+            list.innerHTML = '<div class="transaction">No transactions yet!</div>';
+        }
     }
 };
 
 const showAdmin = () => {
     const sel = document.getElementById('selectedKid');
     const rec = document.getElementById('receiverKid');
-    sel.innerHTML = ''; rec.innerHTML = '';
+    sel.innerHTML = '';
+    if(rec) rec.innerHTML = '';
     
     Object.keys(users).forEach(n => {
         if (!users[n].admin) {
             const opt = `<option value="${n}">${users[n].displayName || n}</option>`;
             sel.innerHTML += opt;
-            rec.innerHTML += opt;
+            if(rec) rec.innerHTML += opt;
         }
     });
     refreshKidCards();
@@ -115,17 +124,30 @@ const refreshKidCards = () => {
     Object.keys(users).forEach(n => {
         if (!users[n].admin) {
             const u = users[n];
+            
+            // Show Live Balances with GOLD
             const card = document.createElement('div');
             card.className = 'kid-card';
-            card.innerHTML = `<h3>${n}</h3><p>💵 $${u.balance}</p><p>🪙 ${u.gold || 0} Gold</p>`;
+            card.innerHTML = `
+                <h3>${n}</h3>
+                <p>Balance: $${u.balance}</p>
+                <p>Gold: 🪙 ${u.gold || 0}</p>
+            `;
             grid.appendChild(card);
 
+            // Show History in Admin Panel
             if (adminHistory) {
                 const section = document.createElement('div');
-                section.innerHTML = `<hr><h4>${n} History</h4>`;
-                (u.transactions || []).slice().reverse().forEach(t => {
-                    section.innerHTML += `<div class="transaction">${t}</div>`;
-                });
+                section.className = 'admin-history-section';
+                section.innerHTML = `<h4>${n} Transactions</h4>`;
+                const hist = u.transactions || [];
+                if (hist.length > 0) {
+                    hist.slice().reverse().forEach(t => {
+                        section.innerHTML += `<div class="transaction">${t}</div>`;
+                    });
+                } else {
+                    section.innerHTML += `<div class="transaction">No history</div>`;
+                }
                 adminHistory.appendChild(section);
             }
         }
@@ -136,32 +158,41 @@ const applyAction = () => {
     const kid = document.getElementById('selectedKid').value;
     const type = document.getElementById('actionType').value;
     const amt = Number(document.getElementById('amount').value);
-    const reason = document.getElementById('reason').value || "No reason";
+    const reason = document.getElementById('reason').value || "No reason provided";
     
-    if (!users[kid]) return alert("Select a kid!");
+    if (!users[kid]) return alert("Select a kid first!");
+    if (amt <= 0) return alert("Enter a valid amount!");
     if (!users[kid].transactions) users[kid].transactions = [];
 
     if (type === 'add') {
         users[kid].balance += amt;
         users[kid].transactions.push(`💰 +$${amt} | ${reason}`);
-    } else if (type === 'remove' || type === 'tax') {
+    } else if (type === 'remove') {
         users[kid].balance -= amt;
         users[kid].transactions.push(`📉 -$${amt} (Tax/Fine) | ${reason}`);
     } else if (type === 'addGold') {
         users[kid].gold = (users[kid].gold || 0) + amt;
         users[kid].transactions.push(`🪙 +${amt} Gold | ${reason}`);
     } else if (type === 'removeGold') {
-        users[kid].gold = Math.max(0, (users[kid].gold || 0) - amt);
-        users[kid].transactions.push(`🪙 -${amt} Gold | ${reason}`);
+        users[kid].gold = Math.max(0, (users[kid].gold || 0) - amt); // Prevents negative gold
+        users[kid].transactions.push(`📤 -${amt} Gold | ${reason}`);
     }
 
     db.ref('users').set(users);
-    alert('Action Applied!');
+    alert('Transaction Successful!');
+    
+    // Clear the input boxes after success
+    document.getElementById('amount').value = '';
+    document.getElementById('reason').value = '';
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     connectDatabase();
     document.getElementById('loginButton').onclick = login;
-    document.getElementById('applyActionButton').onclick = applyAction;
-    document.getElementById('toggleTheme').onclick = () => document.body.classList.toggle('dark');
+    
+    const applyBtn = document.getElementById('applyActionButton');
+    if (applyBtn) applyBtn.onclick = applyAction;
+    
+    const themeBtn = document.getElementById('toggleTheme');
+    if (themeBtn) themeBtn.onclick = () => document.body.classList.toggle('dark');
 });
