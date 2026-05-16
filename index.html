@@ -27,7 +27,10 @@
             <div class="balance-card">
                 <h2>Balance</h2>
                 <div class="balance" id="balance">$0</div>
-                <div id="goldBalance">🪙 Gold: 0</div>
+                <div id="goldBalance">
+                    🪙 Gold: 0 <br>
+                    <small style="font-size: 0.9rem; opacity: 0.9;">(Current Market Value: $<span class="live-gold-price">10</span>/ea)</small>
+                </div>
             </div>
 
             <h2 class="subtitle">Transactions</h2>
@@ -60,17 +63,20 @@
 
             <button id="applyActionButton">Apply Action</button>
 
-            <h2 class="subtitle">Live Balances</h2>
+            <h2 class="subtitle" style="margin-top: 30px;">📈 Gold Market</h2>
+            <p style="margin-bottom: 10px; font-weight: bold;">Current Price: $<span class="live-gold-price">10</span></p>
+            <input type="number" id="newGoldPrice" placeholder="Enter new price per Gold Coin">
+            <button id="setGoldPriceBtn" style="background: #f1c40f; color: #333;">Update Gold Price</button>
+
+            <h2 class="subtitle" style="margin-top: 30px;">Live Balances</h2>
             <div class="kid-grid" id="kidGrid"></div>
 
             <h2 class="subtitle">Full History Log</h2>
             <div id="adminFullHistory"></div>
 
-            <button id="adminLogout" onclick="location.reload()">Logout Admin</button>
+            <button id="adminLogout" onclick="location.reload()" style="background: #e74c3c; margin-top: 20px;">Logout Admin</button>
         </div>
     </div>
-
-    <select id="receiverKid" class="hidden"></select>
 
     <script src="script.js" defer></script>
 </body>

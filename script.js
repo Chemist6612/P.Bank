@@ -25,8 +25,8 @@ const defaultUsers = {
 
 let users = { ...defaultUsers };
 let currentUser = null;
+let goldPrice = 10; // Default gold price
 
-// Helper to fill dropdowns (Forces lists to load for Brave Browser)
 const populateLoginUsers = () => {
     const loginSelect = document.getElementById('username');
     if (!loginSelect) return;
@@ -41,6 +41,8 @@ const populateLoginUsers = () => {
 
 const connectDatabase = () => {
     populateLoginUsers(); 
+    
+    // Listen for User Data
     db.ref('users').on('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
@@ -51,6 +53,20 @@ const connectDatabase = () => {
             }
         } else {
             db.ref('users').set(defaultUsers);
+        }
+    });
+
+    // Listen for Global Gold Price
+    db.ref('settings/goldPrice').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data !== null) {
+            goldPrice = data;
+            // Update all places showing the gold price
+            document.querySelectorAll('.live-gold-price').forEach(el => {
+                el.innerText = goldPrice;
+            });
+        } else {
+            db.ref('settings/goldPrice').set(10); // Sets default if empty
         }
     });
 };
@@ -78,7 +94,6 @@ const showUser = () => {
     const u = users[currentUser];
     document.getElementById('welcome').innerText = `Welcome ${u.displayName || currentUser}`;
     document.getElementById('balance').innerText = `$${u.balance}`;
-    document.getElementById('goldBalance').innerText = `🪙 Gold: ${u.gold || 0}`;
     
     const list = document.getElementById('transactionList');
     if (list) {
@@ -99,15 +114,11 @@ const showUser = () => {
 
 const showAdmin = () => {
     const sel = document.getElementById('selectedKid');
-    const rec = document.getElementById('receiverKid');
     sel.innerHTML = '';
-    if(rec) rec.innerHTML = '';
     
     Object.keys(users).forEach(n => {
         if (!users[n].admin) {
-            const opt = `<option value="${n}">${users[n].displayName || n}</option>`;
-            sel.innerHTML += opt;
-            if(rec) rec.innerHTML += opt;
+            sel.innerHTML += `<option value="${n}">${users[n].displayName || n}</option>`;
         }
     });
     refreshKidCards();
@@ -132,6 +143,7 @@ const refreshKidCards = () => {
                 <h3>${n}</h3>
                 <p>Balance: $${u.balance}</p>
                 <p>Gold: 🪙 ${u.gold || 0}</p>
+                <p style="font-size: 0.8rem; margin-top: 5px; opacity: 0.7;">Gold Value: $${(u.gold || 0) * goldPrice}</p>
             `;
             grid.appendChild(card);
 
@@ -174,16 +186,25 @@ const applyAction = () => {
         users[kid].gold = (users[kid].gold || 0) + amt;
         users[kid].transactions.push(`🪙 +${amt} Gold | ${reason}`);
     } else if (type === 'removeGold') {
-        users[kid].gold = Math.max(0, (users[kid].gold || 0) - amt); // Prevents negative gold
+        users[kid].gold = Math.max(0, (users[kid].gold || 0) - amt);
         users[kid].transactions.push(`📤 -${amt} Gold | ${reason}`);
     }
 
     db.ref('users').set(users);
     alert('Transaction Successful!');
     
-    // Clear the input boxes after success
     document.getElementById('amount').value = '';
     document.getElementById('reason').value = '';
+};
+
+const updateGlobalGoldPrice = () => {
+    const newPrice = Number(document.getElementById('newGoldPrice').value);
+    if (newPrice <= 0) return alert("Enter a valid price greater than 0!");
+    
+    // Save to Firebase
+    db.ref('settings/goldPrice').set(newPrice);
+    alert(`Gold Price updated to $${newPrice}!`);
+    document.getElementById('newGoldPrice').value = '';
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -192,6 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const applyBtn = document.getElementById('applyActionButton');
     if (applyBtn) applyBtn.onclick = applyAction;
+
+    const goldBtn = document.getElementById('setGoldPriceBtn');
+    if (goldBtn) goldBtn.onclick = updateGlobalGoldPrice;
     
     const themeBtn = document.getElementById('toggleTheme');
     if (themeBtn) themeBtn.onclick = () => document.body.classList.toggle('dark');
