@@ -33,6 +33,33 @@
                 </div>
             </div>
 
+            <div class="user-actions-grid">
+                <div class="sub-section">
+                    <h3 class="subtitle">💸 Transfer Money</h3>
+                    <label for="transferUser">Send To:</label>
+                    <select id="transferUser">
+                        <option value="">Select Recipient</option>
+                    </select>
+                    <input type="number" id="transferAmount" placeholder="Amount to send">
+                    <button id="transferBtn">Send Money</button>
+                </div>
+
+                <div class="sub-section">
+                    <h3 class="subtitle">🪙 Gold Exchange</h3>
+                    <label for="goldAmount">Amount of Gold Coins:</label>
+                    <input type="number" id="goldAmount" placeholder="Number of coins">
+                    <div style="display: flex; gap: 10px;">
+                        <button id="buyGoldBtn" style="background: #2ecc71; margin-top: 5px;">Buy Gold</button>
+                        <button id="sellGoldBtn" style="background: #e67e22; margin-top: 5px;">Sell Gold</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qr-section" style="text-align: center; margin-top: 20px; margin-bottom: 25px;">
+                <h3 class="subtitle">📱 My Personal QR Code</h3>
+                <img id="userQrCode" src="" alt="User QR Code" style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 150px; height: 150px;">
+            </div>
+
             <h2 class="subtitle">Transactions</h2>
             <div id="transactionList">
                 <div class="transaction">No transactions yet.</div>
@@ -63,7 +90,7 @@
 
             <button id="applyActionButton">Apply Action</button>
 
-            <h2 class="subtitle" style="margin-top: 30px;">📈 Gold Market</h2>
+            <h2 class="subtitle" style="margin-top: 30px;">📈 Gold Market Settings</h2>
             <p style="margin-bottom: 10px; font-weight: bold;">Current Price: $<span class="live-gold-price">10</span></p>
             <input type="number" id="newGoldPrice" placeholder="Enter new price per Gold Coin">
             <button id="setGoldPriceBtn" style="background: #f1c40f; color: #333;">Update Gold Price</button>

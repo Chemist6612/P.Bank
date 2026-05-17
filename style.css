@@ -52,6 +52,22 @@ button:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
 .hidden { display: none !important; }
 
+/* Dashboard actions grid layout */
+.user-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.sub-section {
+    background: #fdfdfd;
+    padding: 15px;
+    border-radius: 18px;
+    border: 2px dashed #ffb6f9;
+}
+
 .transaction { 
     background: #f8f9fa; 
     padding: 12px; 
@@ -106,7 +122,8 @@ body.dark .subtitle {
 
 body.dark p, 
 body.dark label,
-body.dark small {
+body.dark small,
+body.dark h3 {
     color: white !important;
 }
 
@@ -114,6 +131,11 @@ body.dark .panel,
 body.dark .kid-card { 
     background: #1e1e1e; 
     color: white !important; 
+}
+
+body.dark .sub-section {
+    background: #252525;
+    border: 2px dashed #555;
 }
 
 body.dark .transaction {
@@ -135,5 +157,5 @@ body.dark button {
 
 body.dark button#setGoldPriceBtn {
     background: #f1c40f !important;
-    color: #111 !important; /* Keep the gold button text dark so it's readable */
+    color: #111 !important;
 }
