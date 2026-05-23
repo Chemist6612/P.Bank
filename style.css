@@ -28,17 +28,22 @@ body {
 
 .subtitle { color: #ff4fa3; margin-bottom: 15px; }
 
-input, select, button { 
+label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; }
+
+input[type="text"], input[type="password"], input[type="number"], input[type="email"], input[type="date"], select, button { 
     width: 100%; 
     padding: 14px; 
-    margin-top: 12px; 
-    margin-bottom: 16px; 
+    margin-top: 8px; 
+    margin-bottom: 12px; 
     border: none; 
     border-radius: 12px; 
     font-size: 16px; 
 }
 
 input, select { background: #f0f2f5; }
+
+/* Making radio buttons look normal */
+input[type="radio"] { width: auto; margin: 0 5px 0 0; transform: scale(1.2); }
 
 button { 
     background: #ff69b4; 
@@ -52,7 +57,6 @@ button:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
 .hidden { display: none !important; }
 
-/* Dashboard actions grid layout */
 .user-actions-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -104,58 +108,25 @@ button:hover { filter: brightness(1.1); transform: translateY(-2px); }
 /* --- THE PURE WHITE DARK THEME FIX ---     */
 /* ========================================= */
 
-body.dark { 
-    background: linear-gradient(135deg, #111, #222, #333); 
-    color: white; 
-}
+body.dark { background: linear-gradient(135deg, #111, #222, #333); color: white; }
+body.dark .title { color: white !important; text-shadow: none; }
+body.dark .subtitle { color: white !important; border-left: 4px solid white; padding-left: 10px; }
+body.dark p, body.dark label, body.dark small, body.dark h3 { color: white !important; }
+body.dark .panel, body.dark .kid-card { background: #1e1e1e; color: white !important; }
+body.dark .sub-section { background: #252525; border: 2px dashed #555; }
+body.dark .transaction { border-left: 4px solid white; background: #2a2a2a; color: white !important; }
 
-body.dark .title { 
-    color: white !important; 
-    text-shadow: none; 
-}
-
-body.dark .subtitle { 
-    color: white !important; 
-    border-left: 4px solid white; 
-    padding-left: 10px;
-}
-
-body.dark p, 
-body.dark label,
-body.dark small,
-body.dark h3 {
-    color: white !important;
-}
-
-body.dark .panel, 
-body.dark .kid-card { 
-    background: #1e1e1e; 
-    color: white !important; 
-}
-
-body.dark .sub-section {
-    background: #252525;
-    border: 2px dashed #555;
-}
-
-body.dark .transaction {
-    border-left: 4px solid white;
-    background: #2a2a2a;
-    color: white !important;
-}
-
-body.dark input, 
+body.dark input[type="text"], 
+body.dark input[type="password"], 
+body.dark input[type="number"], 
+body.dark input[type="email"], 
+body.dark input[type="date"], 
 body.dark select { 
     background: #333; 
     color: white !important; 
     border: 1px solid #444;
 }
 
-body.dark button {
-    color: white !important;
-}
-
-body.dark button#setGoldPriceBtn {
-    background: #f1c40f !important;
-    color: #111 !important;
-}
+body.dark input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+body.dark button { color: white !important; }
+body.dark button#setGoldPriceBtn { background: #f1c40f !important; color: #111 !important; }

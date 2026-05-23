@@ -1,110 +1,263 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kids Bank Ultimate</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kids Bank Ultimate</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
-        <button id="toggleTheme" class="toggle-theme">🌙 Toggle Dark Mode</button>
 
-        <div class="panel" id="loginBox">
-            <h2 class="subtitle">Login</h2>
-            <select id="username">
-                <option value="">Choose Account</option>
-            </select>
-            <input type="password" id="password" placeholder="PIN">
-            <button id="loginButton">Login</button>
-        </div>
+<div class="container">
 
-        <div class="panel hidden" id="dashboard">
-            <h2 class="subtitle" id="welcome"></h2>
-            <div class="balance-card">
-                <h2>Balance</h2>
-                <div class="balance" id="balance">$0</div>
-                <div id="goldBalance">
-                    🪙 Gold: 0 <br>
-                    <small style="font-size: 0.9rem; opacity: 0.9;">(Current Market Value: $<span class="live-gold-price">10</span>/ea)</small>
-                </div>
-            </div>
+<h1 class="title">🏦 Kids Bank Ultimate 🏦</h1>
 
-            <div class="user-actions-grid">
-                <div class="sub-section">
-                    <h3 class="subtitle">💸 Transfer Money</h3>
-                    <label for="transferUser">Send To:</label>
-                    <select id="transferUser">
-                        <option value="">Select Recipient</option>
-                    </select>
-                    <input type="number" id="transferAmount" placeholder="Amount to send">
-                    <button id="transferBtn">Send Money</button>
-                </div>
+<button id="toggleTheme" class="toggle-theme">
+🌙 Toggle Dark Mode
+</button>
 
-                <div class="sub-section">
-                    <h3 class="subtitle">🪙 Gold Exchange</h3>
-                    <label for="goldAmount">Amount of Gold Coins:</label>
-                    <input type="number" id="goldAmount" placeholder="Number of coins">
-                    <div style="display: flex; gap: 10px;">
-                        <button id="buyGoldBtn" style="background: #2ecc71; margin-top: 5px;">Buy Gold</button>
-                        <button id="sellGoldBtn" style="background: #e67e22; margin-top: 5px;">Sell Gold</button>
-                    </div>
-                </div>
-            </div>
+<!-- LOGIN PANEL -->
+<div class="panel" id="loginBox">
 
-            <div class="qr-section" style="text-align: center; margin-top: 20px; margin-bottom: 25px;">
-                <h3 class="subtitle">📱 My Personal QR Code</h3>
-                <img id="userQrCode" src="" alt="User QR Code" style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 150px; height: 150px;">
-            </div>
+<h2 class="subtitle">Login</h2>
 
-            <h2 class="subtitle">Transactions</h2>
-            <div id="transactionList">
-                <div class="transaction">No transactions yet.</div>
-            </div>
+<select id="username">
+<option value="">Choose Account</option>
+</select>
 
-            <button id="logoutButton" onclick="location.reload()">Logout</button>
-        </div>
+<input type="password" id="password" placeholder="PIN">
 
-        <div class="panel hidden" id="adminPanel">
-            <h2 class="subtitle">👑 Admin Control Panel</h2>
-            
-            <label for="selectedKid">Select Member:</label>
-            <select id="selectedKid"></select>
+<button id="loginButton">Login</button>
 
-            <label for="actionType">Action:</label>
-            <select id="actionType">
-                <option value="add">💰 Give Money</option>
-                <option value="remove">📉 Take Money (Tax)</option>
-                <option value="addGold">🪙 Give Gold</option>
-                <option value="removeGold">📤 Take Gold</option>
-            </select>
+<p style="text-align:center;margin-top:15px;">
+You don't have an account?
+<a href="#" id="showRegisterBtn" style="color:#ff69b4;font-weight:bold;text-decoration:none;">
+Create one
+</a>
+</p>
 
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" placeholder="Enter amount">
+</div>
 
-            <label for="reason">Reason:</label>
-            <input type="text" id="reason" placeholder="e.g. For doing chores or Late tax">
+<!-- REGISTER PANEL -->
+<div class="panel hidden" id="registerBox">
 
-            <button id="applyActionButton">Apply Action</button>
+<h2 class="subtitle">Create Account</h2>
 
-            <h2 class="subtitle" style="margin-top: 30px;">📈 Gold Market Settings</h2>
-            <p style="margin-bottom: 10px; font-weight: bold;">Current Price: $<span class="live-gold-price">10</span></p>
-            <input type="number" id="newGoldPrice" placeholder="Enter new price per Gold Coin">
-            <button id="setGoldPriceBtn" style="background: #f1c40f; color: #333;">Update Gold Price</button>
+<label>What do you want your account name to be *</label>
+<input type="text" id="regAccountName" placeholder="Account Name">
 
-            <h2 class="subtitle" style="margin-top: 30px;">Live Balances</h2>
-            <div class="kid-grid" id="kidGrid"></div>
+<label>Email Address *</label>
+<input type="email" id="regEmail" placeholder="Your Email">
 
-            <h2 class="subtitle">Full History Log</h2>
-            <div id="adminFullHistory"></div>
+<label>What would you like the password would be (4 digits) and only put numbers or it wont be accepted *</label>
+<input type="password" id="regPassword" placeholder="4-Digit PIN" maxlength="4">
 
-            <button id="adminLogout" onclick="location.reload()" style="background: #e74c3c; margin-top: 20px;">Logout Admin</button>
-        </div>
-    </div>
+<label>Your name *</label>
+<input type="text" id="regName" placeholder="First Name">
 
-    <script src="script.js" defer></script>
+<label>Your family name *</label>
+<input type="text" id="regFamilyName" placeholder="Family Name">
+
+<label>Your dad's name *</label>
+<input type="text" id="regDadName" placeholder="Dad's Name">
+
+<label>When were you born? *</label>
+<input type="date" id="regDob">
+
+<label>What's your gender *</label>
+
+<div class="radio-group" style="margin-bottom:15px;margin-top:10px;display:flex;gap:15px;flex-wrap:wrap;">
+
+<label>
+<input type="radio" name="regGender" value="Male">
+Male
+</label>
+
+<label>
+<input type="radio" name="regGender" value="Female">
+Female
+</label>
+
+<label>
+<input type="radio" name="regGender" value="Prefer not to say">
+Prefer not to say
+</label>
+
+</div>
+
+<button id="registerSubmitBtn" style="background:#2ecc71;">
+Register Now
+</button>
+
+<p style="text-align:center;margin-top:15px;">
+<a href="#" id="backToLoginBtn" style="color:#999;text-decoration:none;">
+Back to Login
+</a>
+</p>
+
+</div>
+
+<!-- USER DASHBOARD -->
+<div class="panel hidden" id="dashboard">
+
+<h2 class="subtitle" id="welcome"></h2>
+
+<div class="balance-card">
+
+<h2>Balance</h2>
+
+<div class="balance" id="balance">$0</div>
+
+<div id="goldBalance">
+🪙 Gold: 0
+<br>
+<small style="font-size:0.9rem;opacity:0.9;">
+(Current Market Value: $<span class="live-gold-price">10</span>/ea)
+</small>
+</div>
+
+</div>
+
+<div class="user-actions-grid">
+
+<div class="sub-section">
+
+<h3 class="subtitle">💸 Transfer Money</h3>
+
+<label for="transferUser">Send To:</label>
+
+<select id="transferUser">
+<option value="">Select Recipient</option>
+</select>
+
+<input type="number" id="transferAmount" placeholder="Amount to send">
+
+<button id="transferBtn">Send Money</button>
+
+</div>
+
+<div class="sub-section">
+
+<h3 class="subtitle">🪙 Gold Exchange</h3>
+
+<label for="goldAmount">Amount of Gold Coins:</label>
+
+<input type="number" id="goldAmount" placeholder="Number of coins">
+
+<div style="display:flex;gap:10px;">
+
+<button id="buyGoldBtn" style="background:#2ecc71;margin-top:5px;">
+Buy Gold
+</button>
+
+<button id="sellGoldBtn" style="background:#e67e22;margin-top:5px;">
+Sell Gold
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="qr-section" style="text-align:center;margin-top:20px;margin-bottom:25px;">
+
+<h3 class="subtitle">📱 My Personal QR Code</h3>
+
+<img id="userQrCode"
+src=""
+alt="User QR Code"
+style="background:white;padding:10px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);width:150px;height:150px;">
+
+</div>
+
+<h2 class="subtitle">Transactions</h2>
+
+<div id="transactionList">
+<div class="transaction">No transactions yet.</div>
+</div>
+
+<button id="logoutButton" onclick="location.reload()">
+Logout
+</button>
+
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="panel hidden" id="adminPanel">
+
+<h2 class="subtitle">👑 Admin Control Panel</h2>
+
+<label for="selectedKid">Select Member:</label>
+
+<select id="selectedKid"></select>
+
+<label for="actionType">Action:</label>
+
+<select id="actionType">
+<option value="add">💰 Give Money</option>
+<option value="remove">📉 Take Money (Tax)</option>
+<option value="addGold">🪙 Give Gold</option>
+<option value="removeGold">📤 Take Gold</option>
+</select>
+
+<label for="amount">Amount:</label>
+
+<input type="number" id="amount" placeholder="Enter amount">
+
+<label for="reason">Reason:</label>
+
+<input type="text" id="reason" placeholder="e.g. For chores">
+
+<button id="applyActionButton">
+Apply Action
+</button>
+
+<h2 class="subtitle" style="margin-top:30px;">
+📈 Gold Market Settings
+</h2>
+
+<p style="margin-bottom:10px;font-weight:bold;">
+Current Price: $<span class="live-gold-price">10</span>
+</p>
+
+<input type="number" id="newGoldPrice" placeholder="Enter new price">
+
+<button id="setGoldPriceBtn" style="background:#f1c40f;color:#333;">
+Update Gold Price
+</button>
+
+<h2 class="subtitle" style="margin-top:30px;">
+Live Balances
+</h2>
+
+<div class="kid-grid" id="kidGrid"></div>
+
+<h2 class="subtitle" style="margin-top:30px;">
+⏳ Pending Accounts
+</h2>
+
+<div id="pendingAccounts"></div>
+
+<h2 class="subtitle">
+Full History Log
+</h2>
+
+<div id="adminFullHistory"></div>
+
+<button id="adminLogout"
+onclick="location.reload()"
+style="background:#e74c3c;margin-top:20px;">
+Logout Admin
+</button>
+
+</div>
+
+</div>
+
+<script src="script.js" defer></script>
+
 </body>
 </html>
